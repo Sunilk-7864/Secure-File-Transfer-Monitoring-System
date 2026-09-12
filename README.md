@@ -52,6 +52,71 @@ The key objectives of the system are:
 **<li>Maintain detailed audit logs:** Store information such as file name, user, timestamp, source, destination, operation, and transfer status for security investigation.</li>
 **<li>Generate security reports:** Provide summarized reports of file-transfer activities, detected violations, integrity failures, and potential security incidents.</li>
 **<li>Improve data protection:** Reduce the risk of data leakage, unauthorized file transfers, and malicious file manipulation through continuous monitoring and auditing.</li>
+
+
+## Practical Scope of the Project
+
+The Secure File Transfer Monitoring System focuses on monitoring file-related activities, detecting unauthorized data movement, verifying file integrity, and generating security reports. The practical scope of the project includes the following components:
+
+### 1. File Transfer Logging
+
+The system continuously monitors and records file-related activities performed on the system.
+
+Monitor file copy, move, delete, upload, and download events.
+Record important details such as:
+File name and file type
+Timestamp of the activity
+Source path
+Destination path
+User account
+Process or application name
+Type of file operation
+Maintain structured audit logs that can be used for security analysis and investigation.
+### 2. Unauthorized Movement Detection
+
+The system identifies suspicious or unauthorized movement of sensitive files.
+
+Maintain a configurable list of sensitive directories, confidential files, and restricted locations.
+Detect unauthorized access, copying, or movement of protected files.
+Generate alerts when defined security policies are violated.
+Monitor suspicious outbound transfers involving:
+USB/removable storage devices
+Network shares
+Cloud-synchronized folders
+Other external destinations
+Identify unusual file-transfer activities that may indicate potential data exfiltration.
+### 3. File Integrity Checks
+
+The system uses cryptographic hashing to verify that files have not been modified or tampered with during or after transfer.
+
+<li>Calculate pre-transfer and post-transfer hash values.</li>
+<li>Support hashing algorithms such as SHA-256 and MD5.</li>
+<li>Compare hash values to identify changes in file contents.</li>
+<li>Detect:</li>
+         <li>Unauthorized modifications</li>
+<li>File tampering</li>
+<LI>File corruption</LI>
+<LI>Unexpected file replacement</LI>
+<LI>Highlight integrity mismatches for further investigation.</LI>
+
+### 4. Reporting and Alert System
+
+The system provides security alerts and detailed reports based on monitored file activities.
+
+Generate logs for all monitored file events.
+Highlight policy violations and suspicious file transfers.
+Generate alerts when unauthorized activities or integrity violations are detected.
+Maintain a searchable audit trail for security investigations.
+Produce a final audit report summarizing:
+File-transfer activities
+Unauthorized movements
+Integrity violations
+Detected policy violations
+Security alerts
+Overall monitoring results
+## Overall Scope
+
+The project provides a centralized approach to file-transfer monitoring, unauthorized movement detection, integrity verification, and security auditing. It can help organizations improve visibility into file activities and identify potential security incidents before they result in significant data loss or unauthorized disclosure.
 ## Features
 
 - File creation, modification, movement, deletion, upload, and download logging
