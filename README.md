@@ -314,6 +314,12 @@ def calculate_sha256(file_path):
 
     return sha256_hash.hexdigest()
 
+## Example Output
+
+File: D:/Monitored/sample.pdf
+
+SHA-256:
+a7f5f35426b927411fc9231b56382173...
 
 file_path = "D:/Monitored/sample.pdf"
 
@@ -321,3 +327,33 @@ file_hash = calculate_sha256(file_path)
 
 print("File:", file_path)
 print("SHA-256:", file_hash)
+
+## win32api / PowerShell Get-ChildItem (optional for Windows)
+
+For a Secure File Transfer Monitoring System using Python on Windows, win32api and PowerShell's Get-ChildItem can be used as optional Windows-specific tools. They are useful for obtaining file information and performing additional checks alongside Python's watchdog and hashlib.
+**1. win32api**
+
+win32api is part of the PyWin32 package and provides Python access to Windows API functions.
+
+Install it with:
+pip install pywin32
+
+It can be used to obtain information such as:
+
+    File attributes
+    File timestamps
+    File paths
+    Windows-specific file information
+    File-system operations
+
+For example:
+
+import win32api
+
+file_path = r"D:\Monitored\sample.pdf"
+
+info = win32api.GetFileAttributes(file_path)
+
+print("File Attributes:", info)
+
+For a monitoring project, this information can be added to the security log along with the file's SHA-256 hash.
