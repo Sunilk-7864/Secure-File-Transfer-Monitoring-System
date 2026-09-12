@@ -72,6 +72,27 @@ User account
 Process or application name
 Type of file operation
 Maintain structured audit logs that can be used for security analysis and investigation.
+
+
+Each event can be recorded with:
+
+Timestamp<br>
+Event Type<br>
+File Name<br>
+File Path<br>
+File Hash<br>
+Process Information<br>
+Security Status
+
+Example:
+
+2026-09-12 16:30:21<br>
+Event: File Created<br>
+File: confidential.pdf<br>
+Path: D:\Monitored\confidential.pdf<br>
+Hash: SHA-256: ...<br>
+Status: Logged
+
 ### 2. Unauthorized Movement Detection
 
 The system identifies suspicious or unauthorized movement of sensitive files.
@@ -99,60 +120,204 @@ The system uses cryptographic hashing to verify that files have not been modifie
 <LI>Unexpected file replacement</LI>
 <LI>Highlight integrity mismatches for further investigation.</LI>
 
+When a file is detected, the system can calculate its SHA-256 hash using Python's hashlib module.</p>
+
+For example:
+
+File: report.pdf
+
+Original Hash:
+8f14e45fceea167a5a36dedd4bea2543...
+
+Current Hash:
+91c3d4e7a2b1c9d8e6f5a4b3c2d1e0f9...
+
+Status: FILE MODIFIED
+
+
 ### 4. Reporting and Alert System
 
 The system provides security alerts and detailed reports based on monitored file activities.
 
-Generate logs for all monitored file events.
-Highlight policy violations and suspicious file transfers.
-Generate alerts when unauthorized activities or integrity violations are detected.
-Maintain a searchable audit trail for security investigations.
-Produce a final audit report summarizing:
-File-transfer activities
-Unauthorized movements
-Integrity violations
-Detected policy violations
-Security alerts
+<LI>Generate logs for all monitored file events.</LI>
+<LI>Highlight policy violations and suspicious file transfers.</LI>
+<LI>Generate alerts when unauthorized activities or integrity violations are detected.</LI>
+<LI>Maintain a searchable audit trail for security investigations.</LI>
+
+**Produce a final audit report summarizing:**
+<LI>File-transfer activities</LI>
+<LI>Unauthorized movements</LI>
+<LI>Integrity violations</LI>
+<LI>Detected policy violations</LI>
+<LI>Security alerts</LI>
 Overall monitoring results
+
 ## Overall Scope
 
 The project provides a centralized approach to file-transfer monitoring, unauthorized movement detection, integrity verification, and security auditing. It can help organizations improve visibility into file activities and identify potential security incidents before they result in significant data loss or unauthorized disclosure.
-## Features
 
-- File creation, modification, movement, deletion, upload, and download logging
-- Sensitive-directory and restricted-file monitoring
-- SHA-256 integrity verification
-- Unauthorized movement detection
-- Security alerts and audit reports
+## Tools & Technologies Used
 
-## Ethical Use
+### Programming languages:
 
-This project is intended for systems owned by, or operated with permission
-from, the user or organization deploying it. Do not monitor files, users,
-devices, or networks without authorization.
+<li>Python</li>
 
-## Installation
+#### Models / Tools
+Install the required library:
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m file_monitor
-```
+pip install watchdog
 
-## Configuration
+A basic monitoring program can be implemented as follows:
 
-Copy the example configuration:
+import hashlib
+import logging
+import os
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-```bash
-cp .env.example .env
-```
 
-Never commit `.env`, real logs, credentials, or confidential file content.
+MONITOR_FOLDER = "D:/Monitored"
 
-## Limitations
 
-Filesystem monitoring may not reveal every operating-system-level transfer,
-especially transfers performed through privileged processes, cloud clients,
-or remote systems. Use this tool as a monitoring component, not as a complete
-DLP solution.
+logging.basicConfig(
+    filename="file_monitor.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
+def calculate_hash(file_path):
+    """Calculate SHA-256 hash of a file."""
+    sha256 = hashlib.sha256()
+
+    try:
+        with open(file_path, "rb") as file:
+            for block in iter(lambda: file.read(4096), b""):
+                sha256.update(block)
+
+        return sha256.hexdigest()
+
+    except (FileNotFoundError, PermissionError):
+        return None
+
+
+class FileMonitorHandler(FileSystemEventHandler):
+
+    def on_created(self, event):
+        if not event.is_directory:
+            file_hash = calculate_hash(event.src_path)
+
+            logging.info(
+                "FILE CREATED | Path=%s | SHA256=%s",
+                event.src_path,
+                file_hash
+            )
+
+            print(f"[CREATED] {event.src_path}")
+            print(f"SHA-256: {file_hash}")
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            file_hash = calculate_hash(event.src_path)
+
+            logging.info(
+                "FILE MODIFIED | Path=%s | SHA256=%s",
+                event.src_path,
+                file_hash
+            )
+
+            print(f"[MODIFIED] {event.src_path}")
+            print(f"SHA-256: {file_hash}")
+
+    def on_deleted(self, event):
+        if not event.is_directory:
+            logging.warning(
+                "FILE DELETED | Path=%s",
+                event.src_path
+            )
+
+            print(f"[DELETED] {event.src_path}")
+
+    def on_moved(self, event):
+        if not event.is_directory:
+            logging.info(
+                "FILE MOVED | From=%s | To=%s",
+                event.src_path,
+                event.dest_path
+            )
+
+            print(
+                f"[MOVED] {event.src_path} -> {event.dest_path}"
+            )
+
+
+if __name__ == "__main__":
+
+    event_handler = FileMonitorHandler()
+
+    observer = Observer()
+    observer.schedule(
+        event_handler,
+        MONITOR_FOLDER,
+        recursive=True
+    )
+
+    observer.start()
+
+    print("Secure File Transfer Monitoring System")
+    print(f"Monitoring folder: {MONITOR_FOLDER}")
+    print("Press Ctrl+C to stop.")
+
+    try:
+        while True:
+            pass
+
+    except KeyboardInterrupt:
+        observer.stop()
+
+    observer.join()
+
+    
+<li>hashlib</li>
+
+**The system can follow this process:**
+
+File Received/Transferred
+          ↓
+   Read File Contents
+          ↓
+ Generate SHA-256 Hash
+          ↓
+ Store Hash in Database/Log
+          ↓
+     Later Verification
+          ↓
+ Generate New Hash
+          ↓
+ Compare with Original
+       ↙       ↘
+    Same       Different
+     ↓             ↓
+  Integrity     File Modified
+   Verified       / Alert
+
+**Python Code Using hashlib**
+
+import hashlib
+
+def calculate_sha256(file_path):
+    sha256_hash = hashlib.sha256()
+
+    with open(file_path, "rb") as file:
+        for data in iter(lambda: file.read(4096), b""):
+            sha256_hash.update(data)
+
+    return sha256_hash.hexdigest()
+
+
+file_path = "D:/Monitored/sample.pdf"
+
+file_hash = calculate_sha256(file_path)
+
+print("File:", file_path)
+print("SHA-256:", file_hash)
